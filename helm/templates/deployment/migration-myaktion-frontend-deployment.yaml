@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: migration-myaktion-frontend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: migration-myaktion-frontend
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: migration-myaktion-frontend
+    spec:
+      containers:
+      - name: migration-myaktion-frontend
+        image: romanolu/my-aktion-frontend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        env:
+        - name: REACT_APP_MYAKTION_URL
+          value: http://134.103.212.72:30249

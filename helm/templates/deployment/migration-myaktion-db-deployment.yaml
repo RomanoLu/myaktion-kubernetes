@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: migration-myaktion-db-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: migration-myaktion-db
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: migration-myaktion-db
+    spec:
+      containers:
+      - name: migration-myaktion-db
+        image: postgres:14.5
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: migration-myaktion-db-secret
+              key: DATABASE_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: migration-myaktion-db-secret
+              key: DATABASE_PASSWORD
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: migration-myaktion-db-pv-claim
+          subPath: migration
+      volumes:
+      - name: migration-myaktion-db-pv-claim
+        persistentVolumeClaim:
+          claimName: migration-myaktion-db-pv-claim

@@ -1,0 +1,33 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: traefik
+  creationTimestamp: null
+  name: migration-myaktion-ingress-route
+  namespace: default
+spec:
+  routes:
+  - kind: Rule
+    match: PathPrefix(`/*`)
+    services:
+    - kind: Service
+      name: migration-myaktion-monitor-service
+      namespace: default
+      port: 8080
+
+  - kind: Rule
+    match: PathPrefix(`/*`)
+    services:
+    - kind: Service
+      name: migration-myaktion-frontend-service
+      namespace: default
+      port: 3000
+
+  - kind: Rule
+    match: PathPrefix(`/hello`)
+    services:
+    - kind: Service
+      name: migration-myaktion-service
+      namespace: default
+      port: 8443

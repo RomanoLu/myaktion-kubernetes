@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: migration-myaktion-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: migration-myaktion
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: migration-myaktion
+    spec:
+      containers:
+      - name: migration-myaktion
+        image: romanolu/my-aktion-migration:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8443
+        env:
+        - name: DB_URL
+          value: migration-myaktion-db-service
+        - name: GRPC_IP
+          value: migration-myaktion-monitor-service
+        - name: ISSUER_URL
+          value: migration-myaktion-frontend-service
+        - name: QUARKUS_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: migration-myaktion-db-secret
+              key: DATABASE_USER
+        - name: QUARKUS_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: migration-myaktion-db-secret
+              key: DATABASE_PASSWORD
+
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:postgresql://myaktion-postgres-db/postgres"
+        - name: URL_MYAKTION_MONITOR
+          value: "http://myaktion-monitor-service/donations"
+        - name: SPRING_REDIS_HOST
+          value: "redis-service"

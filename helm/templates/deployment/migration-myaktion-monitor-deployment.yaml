@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: migration-myaktion-monitor-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: migration-myaktion-monitor
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: migration-myaktion-monitor
+    spec:
+      containers:
+      - name: migration-myaktion-monitor
+        image: romanolu/my-aktion-monitor-migration:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PROVIDER_URL
+          value: http://migration-myaktion-service:8443
